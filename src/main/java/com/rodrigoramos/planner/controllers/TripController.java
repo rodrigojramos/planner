@@ -117,4 +117,11 @@ public class TripController {
 
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/{id}/activities")
+    public ResponseEntity<List<ActivityData>> getAllActivities(@PathVariable UUID id) {
+        List<ActivityData> activitiesList = activityService.getAllActivitiesFromEvent(id);
+
+        return ResponseEntity.ok(activitiesList);
+    }
 }
