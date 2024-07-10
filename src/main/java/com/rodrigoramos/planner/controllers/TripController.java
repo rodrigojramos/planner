@@ -1,9 +1,7 @@
 package com.rodrigoramos.planner.controllers;
 
-import com.rodrigoramos.planner.dto.ParticipantCreateResponse;
-import com.rodrigoramos.planner.dto.ParticipantRequestPayload;
-import com.rodrigoramos.planner.dto.TripCreateResponse;
-import com.rodrigoramos.planner.dto.TripRequestPayload;
+import com.rodrigoramos.planner.dto.*;
+import com.rodrigoramos.planner.entities.Participant;
 import com.rodrigoramos.planner.entities.Trip;
 import com.rodrigoramos.planner.repositories.TripRepository;
 import com.rodrigoramos.planner.services.ParticipantService;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -91,5 +90,12 @@ public class TripController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<List<ParticipantData>> getAllParticipants(@PathVariable UUID id) {
+        List<ParticipantData> participantsList = this.participantService.getAllParticipantsFromEvent(id);
+
+        return ResponseEntity.ok(participantsList);
     }
 }

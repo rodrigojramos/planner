@@ -1,6 +1,7 @@
 package com.rodrigoramos.planner.services;
 
 import com.rodrigoramos.planner.dto.ParticipantCreateResponse;
+import com.rodrigoramos.planner.dto.ParticipantData;
 import com.rodrigoramos.planner.entities.Participant;
 import com.rodrigoramos.planner.entities.Trip;
 import com.rodrigoramos.planner.repositories.ParticipantRepository;
@@ -25,7 +26,7 @@ public class ParticipantService {
 
     public ParticipantCreateResponse registerParticipantToEvent(String email, Trip trip) {
         Participant newParticipant = new Participant(email, trip);
-        this.participantRepository.save(newParticipant);
+        participantRepository.save(newParticipant);
 
         return new ParticipantCreateResponse(newParticipant.getId());
     }
@@ -33,4 +34,9 @@ public class ParticipantService {
     public void triggerConfirmationEmailToParticipants(UUID tripId){}
 
     public void triggerConfirmationEmailToParticipant(String email){}
+
+    public List<ParticipantData> getAllParticipantsFromEvent(UUID tripId) {
+        return participantRepository.findByTripId(tripId).stream().map(participant -> new ParticipantData(participant.getId(),
+                participant.getName(), participant.getEmail(), participant.getIsConfirmed())).toList();
+    }
 }
