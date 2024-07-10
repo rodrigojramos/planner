@@ -4,6 +4,7 @@ import com.rodrigoramos.planner.dto.*;
 import com.rodrigoramos.planner.entities.Participant;
 import com.rodrigoramos.planner.entities.Trip;
 import com.rodrigoramos.planner.repositories.TripRepository;
+import com.rodrigoramos.planner.services.ActivityService;
 import com.rodrigoramos.planner.services.ParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,9 @@ public class TripController {
 
     @Autowired
     private TripRepository tripRepository;
+
+    @Autowired
+    private ActivityService activityService;
 
     @PostMapping
     public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripRequestPayload payload) {
@@ -97,5 +101,20 @@ public class TripController {
         List<ParticipantData> participantsList = this.participantService.getAllParticipantsFromEvent(id);
 
         return ResponseEntity.ok(participantsList);
+    }
+
+    @PostMapping("/{id}/activities")
+    public ResponseEntity<ActivityResponse> registerActivity(@PathVariable UUID id,
+                                              @RequestBody ActivityRequestPayload payload) {
+        Optional<Trip> trip = tripRepository.findById(id);
+        if (trip.isPresent()) {
+            Trip rawTrip = trip.get();
+
+            ActivityResponse activityResponse = activityService.registerActivity(payload, rawTrip);
+
+            return ResponseEntity.ok(activityResponse);
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
