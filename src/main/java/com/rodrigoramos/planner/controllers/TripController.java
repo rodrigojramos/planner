@@ -1,10 +1,10 @@
 package com.rodrigoramos.planner.controllers;
 
 import com.rodrigoramos.planner.dto.*;
-import com.rodrigoramos.planner.entities.Participant;
 import com.rodrigoramos.planner.entities.Trip;
 import com.rodrigoramos.planner.repositories.TripRepository;
 import com.rodrigoramos.planner.services.ActivityService;
+import com.rodrigoramos.planner.services.LinkService;
 import com.rodrigoramos.planner.services.ParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +28,9 @@ public class TripController {
 
     @Autowired
     private ActivityService activityService;
+
+    @Autowired
+    private LinkService linkService;
 
     @PostMapping
     public ResponseEntity<TripCreateResponse> createTrip(@RequestBody TripRequestPayload payload) {
@@ -123,5 +126,27 @@ public class TripController {
         List<ActivityData> activitiesList = activityService.getAllActivitiesFromEvent(id);
 
         return ResponseEntity.ok(activitiesList);
+    }
+
+    @PostMapping("/{id}/links")
+    public ResponseEntity<LinkResponse> registerLink(@PathVariable UUID id,
+                                          @RequestBody LinkRequestPayload payload) {
+        Optional<Trip> trip = tripRepository.findById(id);
+        if (trip.isPresent()) {
+            Trip rawTrip = trip.get();
+
+            LinkResponse linkResponse = linkService.registerLink(payload, rawTrip);
+
+            return ResponseEntity.ok(linkResponse);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}/links")
+    public ResponseEntity<List<LinkData>> getAllLinks(@PathVariable UUID id) {
+        List<LinkData> linksList = linkService.getAllLinksFromEvent(id);
+
+        return ResponseEntity.ok(linksList);
     }
 }
