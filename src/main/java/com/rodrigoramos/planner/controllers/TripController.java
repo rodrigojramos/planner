@@ -1,5 +1,7 @@
 package com.rodrigoramos.planner.controllers;
 
+import com.rodrigoramos.planner.dto.ParticipantCreateResponse;
+import com.rodrigoramos.planner.dto.ParticipantRequestPayload;
 import com.rodrigoramos.planner.dto.TripCreateResponse;
 import com.rodrigoramos.planner.dto.TripRequestPayload;
 import com.rodrigoramos.planner.entities.Trip;
@@ -29,7 +31,7 @@ public class TripController {
         Trip newTrip = new Trip(payload);
 
         this.tripRepository.save(newTrip);
-        this.participantService.registerParticipantsToEvent(payload.emails_to_invite(), newTrip.getId());
+        this.participantService.registerParticipantsToEvent(payload.emails_to_invite(), newTrip);
 
         return ResponseEntity.ok(new TripCreateResponse(newTrip.getId()));
     }
@@ -67,6 +69,25 @@ public class TripController {
             this.participantService.triggerConfirmationEmailToParticipants(id);
 
             return ResponseEntity.ok(rawTrip);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{id}/invite")
+    public ResponseEntity<ParticipantCreateResponse> inviteParticipant(@PathVariable UUID id,
+                                                         @RequestBody ParticipantRequestPayload payload) {
+        Optional<Trip> trip = tripRepository.findById(id);
+        if (trip.isPresent()) {
+            Trip rawTrip = trip.get();
+
+            ParticipantCreateResponse participantResponse = this.participantService.registerParticipantToEvent(payload.email(), rawTrip);
+
+            if (rawTrip.getIsConfirmed()) {
+                this.participantService.triggerConfirmationEmailToParticipant(payload.email());
+            }
+
+            return ResponseEntity.ok(participantResponse);
         }
 
         return ResponseEntity.notFound().build();
